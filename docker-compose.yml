@@ -1,0 +1,45 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:alpine
+    ports: 
+      - "8000:8000"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx/logs/:/var/log/nginx/
+      - ./nginx/conf/:/etc/nginx/conf.d/
+    networks:
+      - internal
+
+  php-fpm:
+    build: php-fpm
+    networks: 
+      - internal
+    volumes:
+      - ./:/var/www/html
+      - ./php-fpm/php.log:/var/log/fpm-php.www.log
+
+  mysql:
+    image: mysql:9.1.0
+    ports:
+    - "3306:3306"
+    volumes:
+    - ./mysql/data/:/var/lib/mysql
+    networks: 
+      - internal
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: admin123
+      
+  redis:
+    image: redis/redis-stack-server:6.2.6-v17-x86_64
+    ports:
+      - 6379:6379
+    networks:
+      - internal
+    volumes:
+      - ./redis/data:/data 
+
+networks:
+  internal:
+    driver: bridge
